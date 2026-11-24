@@ -856,4 +856,499 @@ CortexAI/
 │   │   │
 │   │   ├── auth/
 │   │   │   ├── config/
-│   │   │   │   ├── db
+│   │   │   │   ├── db.js
+│   │   │   │   └── firebase.js
+│   │   │   ├── controllers/
+│   │   │   │   └── auth.controller.js
+│   │   │   ├── models/
+│   │   │   │   └── user.model.js
+│   │   │   ├── routes/
+│   │   │   │   └── auth.route.js
+│   │   │   ├── Dockerfile
+│   │   │   ├── index.js
+│   │   │   ├── package.json
+│   │   │   └── serviceAccountKey.json
+│   │   │
+│   │   ├── billing/
+│   │   │   ├── config/
+│   │   │   │   ├── db.js
+│   │   │   │   ├── Plans.js
+│   │   │   │   └── razorpay.js
+│   │   │   ├── controllers/
+│   │   │   │   └── billing.controller.js
+│   │   │   ├── models/
+│   │   │   │   └── payment.model.js
+│   │   │   ├── routes/
+│   │   │   │   └── billing.route.js
+│   │   │   ├── Dockerfile
+│   │   │   ├── index.js
+│   │   │   └── package.json
+│   │   │
+│   │   └── chat/
+│   │       ├── config/
+│   │       │   └── db.js
+│   │       ├── controllers/
+│   │       │   └── chat.controller.js
+│   │       ├── models/
+│   │       │   ├── coversation.model.js
+│   │       │   └── message.model.js
+│   │       ├── routes/
+│   │       │   └── chat.routes.js
+│   │       ├── Dockerfile
+│   │       ├── index.js
+│   │       └── package.json
+│   │
+│   ├── shared/
+│   │   └── redis/
+│   │       └── redis.js
+│   │
+│   ├── docker-compose.yml
+│   └── package.json
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Artifact.jsx
+│   │   │   ├── BillingDrawer.jsx
+│   │   │   ├── ChatArea.jsx
+│   │   │   ├── ChatInput.jsx
+│   │   │   ├── LoadingAnimation.jsx
+│   │   │   ├── MessageBubble.jsx
+│   │   │   ├── MessageList.jsx
+│   │   │   ├── Nav.jsx
+│   │   │   └── SideBar.jsx
+│   │   │
+│   │   ├── features/
+│   │   │   ├── createConversation.js
+│   │   │   ├── createOrder.js
+│   │   │   ├── getConversations.js
+│   │   │   ├── getCurrentUser.js
+│   │   │   ├── getMessages.js
+│   │   │   ├── logOut.js
+│   │   │   ├── sendMessage.js
+│   │   │   ├── updateConversation.js
+│   │   │   └── verifyPayment.js
+│   │   │
+│   │   ├── pages/
+│   │   │   └── Home.jsx
+│   │   │
+│   │   ├── redux/
+│   │   │   ├── conversationSlice.js
+│   │   │   ├── messageSlice.js
+│   │   │   ├── store.js
+│   │   │   └── userSlice.js
+│   │   │
+│   │   ├── App.jsx
+│   │   ├── index.css
+│   │   └── main.jsx
+│   │
+│   ├── utils/
+│   │   ├── axios.js
+│   │   └── firebase.js
+│   │
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.js
+│   └── README.md
+│
+├── .gitignore
+└── README.md
+```
+
+---
+
+## Request Lifecycle
+
+### Example: User requests a coding project
+
+Consider a user asking:
+
+"Build a complete React application for managing daily tasks."
+
+The request travels through the following layers.
+
+**Step 1 — Frontend**
+
+The user enters a prompt through `ChatInput.jsx`.
+
+The frontend creates or selects a conversation and prepares the request using `FormData`.
+
+**Step 2 — API Gateway**
+
+The request reaches the Gateway.
+
+The authentication middleware validates the session using Redis and identifies the authenticated user.
+
+The Gateway forwards the request to the Agent Service.
+
+**Step 3 — Agent Service**
+
+The Agent Service receives the prompt, conversation ID, selected agent and user identity.
+
+The controller saves the user message through the Chat Service.
+
+**Step 4 — LangGraph**
+
+The controller invokes the compiled graph with the initial state.
+
+The router determines that the request should be handled by the Coding Agent.
+
+**Step 5 — Coding Agent**
+
+The Coding Agent classifies the request as a code-generation task.
+
+The configured LLM generates a structured response containing project files.
+
+**Step 6 — Artifact Processing**
+
+The generated project is represented as a structured artifact.
+
+The Agent Service processes and persists the result according to the artifact-storage workflow.
+
+**Step 7 — Chat Persistence**
+
+The assistant response and associated artifacts are saved through the Chat Service.
+
+**Step 8 — Frontend Rendering**
+
+The response returns through the Gateway.
+
+The frontend updates its Redux message state and renders the response.
+
+The Artifact component displays the generated project files through Monaco Editor.
+
+---
+
+## Installation and Setup
+
+### Prerequisites
+
+Install the following tools and services before running CortexAI:
+
+- Node.js and npm.
+- Git.
+- MongoDB instance.
+- Redis instance.
+- Firebase project.
+- Qdrant instance or Qdrant Cloud account.
+- Razorpay account.
+- AWS account with an S3 bucket.
+- API credentials for the configured LLM providers.
+- Tavily API key.
+- Docker Desktop (for containerized infrastructure).
+
+### 1. Clone the Repository
+
+```bash
+git clone YOUR_GITHUB_REPOSITORY_URL
+cd CortexAI
+```
+
+### 2. Install Frontend Dependencies
+
+```bash
+cd frontend
+npm install
+```
+
+### 3. Install Backend Dependencies
+
+Install dependencies separately for each service.
+
+```bash
+cd ../backend
+
+npm install
+```
+
+```bash
+cd gateway
+npm install
+```
+
+```bash
+cd ../services/auth
+npm install
+```
+
+```bash
+cd ../chat
+npm install
+```
+
+```bash
+cd ../billing
+npm install
+```
+
+```bash
+cd ../agent
+npm install
+```
+
+---
+
+## Environment Variables
+
+Each backend microservice maintains its own environment configuration.
+
+Create the required `.env` files locally.
+
+The following are configuration categories and variable names to check against the actual service implementations.
+
+### Gateway
+
+Location: `backend/gateway/.env`
+
+```env
+PORT=
+AUTH_SERVICE=
+CHAT_SERVICE=
+AGENT_SERVICE=
+BILLING_SERVICE=
+FRONTEND_URL=
+REDIS_URL=
+```
+
+### Auth Service
+
+Location: `backend/services/auth/.env`
+
+```env
+PORT=
+MONGODB_URI=
+REDIS_URL=
+```
+
+Firebase Admin also requires the service-account credentials configured by the original implementation.
+
+### Chat Service
+
+Location: `backend/services/chat/.env`
+
+```env
+PORT=
+MONGODB_URI=
+```
+
+### Billing Service
+
+Location: `backend/services/billing/.env`
+
+```env
+PORT=
+MONGODB_URI=
+AUTH_SERVICE=
+RAZORPAY_KEY_ID=
+RAZORPAY_KEY_SECRET=
+```
+
+### Agent Service
+
+Location: `backend/services/agent/.env`
+
+```env
+PORT=
+MONGODB_URI=
+
+GROQ_API_KEY=
+GOOGLE_API_KEY=
+OPENROUTER_API_KEY=
+
+CHAT_SERVICE=
+AUTH_SERVICE=
+
+REDIS_URL=
+
+TAVILY_API_KEY=
+
+AWS_REGION=
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_KEY=
+AWS_BUCKET_NAME=
+
+QDRANT_URL=
+QDRANT_API_KEY=
+```
+
+### Frontend
+
+Location: `frontend/.env`
+
+Configure the frontend variables required by the Vite and Firebase implementations.
+
+For example:
+
+```env
+VITE_API_URL=
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+```
+
+Use the exact variable names expected by the original frontend configuration.
+
+**Security:** Never commit real environment files, API keys, AWS credentials, Firebase service-account private keys or Razorpay secrets.
+
+---
+
+## Running the Application
+
+### Start the infrastructure
+
+If Redis is configured through the backend Docker Compose file:
+
+```bash
+cd backend
+docker compose up -d
+```
+
+### Start the Auth Service
+
+```bash
+cd backend/services/auth
+npm start
+```
+
+### Start the Chat Service
+
+```bash
+cd backend/services/chat
+npm start
+```
+
+### Start the Billing Service
+
+```bash
+cd backend/services/billing
+npm start
+```
+
+### Start the Agent Service
+
+```bash
+cd backend/services/agent
+npm start
+```
+
+### Start the API Gateway
+
+```bash
+cd backend/gateway
+npm start
+```
+
+### Start the Frontend
+
+Open another terminal:
+
+```bash
+cd frontend
+npm run dev
+```
+
+The frontend development server will display its local URL in the terminal.
+
+The backend services must be configured with the correct local or container service addresses before requests can be processed successfully.
+
+---
+
+## Docker and Deployment
+
+CortexAI uses Docker to package individual backend services.
+
+Each microservice has its own Dockerfile.
+
+This provides independent build configurations and makes it easier to deploy or restart services separately.
+
+Docker Compose is used for the shared infrastructure configured in the project.
+
+### Start Docker infrastructure
+
+```bash
+cd backend
+docker compose up -d
+```
+
+### Inspect running containers
+
+```bash
+docker ps
+```
+
+### Inspect container logs
+
+```bash
+docker compose logs -f
+```
+
+### Stop containers
+
+```bash
+docker compose down
+```
+
+### CI/CD
+
+The project includes a GitHub Actions deployment workflow:
+
+`.github/workflows/deploy.yml`
+
+The workflow automates deployment using the configured GitHub Actions runner and remote server connection.
+
+The deployment process uses repository secrets for sensitive connection information.
+
+---
+
+## Security Considerations
+
+Security is an important part of the backend architecture.
+
+The application uses several mechanisms to protect authentication and application data:
+
+- Firebase Admin SDK verifies identity tokens on the backend.
+- Redis-backed sessions are used for authenticated requests.
+- HTTP-only cookies help prevent JavaScript access to session cookies.
+- The API Gateway centralizes authentication checks.
+- Authenticated user identity is propagated to internal services.
+- Razorpay payment verification is performed on the backend.
+- Environment variables are used for sensitive configuration.
+- Uploaded files are processed through controlled upload middleware.
+- Internal microservice communication is separated from the public frontend interface.
+
+Production deployments should use HTTPS, secure cookie settings, restricted internal service access, strict CORS configuration, secret rotation and appropriate file validation.
+
+---
+
+## Future Improvements
+
+Potential improvements to the existing architecture include:
+
+- Adding automated backend and frontend testing.
+- Adding structured logging and centralized error monitoring.
+- Introducing tracing across microservice requests.
+- Improving LLM output validation and retry handling.
+- Adding evaluation metrics for agent quality.
+- Improving RAG retrieval with reranking.
+- Introducing metadata-based document isolation in vector storage.
+- Adding more sophisticated agent planning and tool execution.
+- Improving service health checks and observability.
+- Implementing more comprehensive deployment automation.
+
+---
+
+## Author
+
+**Sohom Bhowmick**
+
+GitHub: [Uselesstechi](https://github.com/Uselesstechi)
+
+---
+
+## Project Summary
+
+CortexAI brings together full-stack engineering, backend microservices, authentication, database management, distributed caching, AI orchestration, retrieval-augmented generation, cloud storage, payment integration and deployment automation.
+
+The project demonstrates how multiple specialized AI agents can be coordinated through a shared workflow while maintaining independent backend services for authentication, conversation management, AI execution and billing.
+
+**Built with React, Node.js, Express, MongoDB, Redis, LangChain, LangGraph, Qdrant, AWS S3 and Docker.**
